@@ -73,10 +73,10 @@ static int WAI_PREFIX(getModulePath_)(HMODULE module, char* out, int capacity, i
       path = buffer1;
 
     _wfullpath(buffer2, path, MAX_PATH);
-    length_ = WideCharToMultiByte(CP_UTF8, 0, buffer2, -1, out, (DWORD)capacity, NULL, NULL);
+    length_ = WideCharToMultiByte(CP_UTF8, 0, buffer2, -1, out, capacity, NULL, NULL);
 
     if (length_ == 0)
-      length_ = WideCharToMultiByte(CP_UTF8, 0, buffer2, -1, NULL, (DWORD)0, NULL, NULL);
+      length_ = WideCharToMultiByte(CP_UTF8, 0, buffer2, -1, NULL, 0, NULL, NULL);
     if (length_ == 0)
       break;
 
