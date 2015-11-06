@@ -202,6 +202,11 @@ int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
 #define WAI_PROC_SELF_MAPS "/proc/self/maps"
 #endif
 
+#if defined(__ANDROID__) || defined(ANDROID)
+#include <fcntl.h>
+#include <sys/mman.h>
+#endif
+
 WAI_NOINLINE
 WAI_FUNCSPEC
 int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
@@ -242,6 +247,43 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
             break;
 
           length = (int)strlen(resolved);
+#if defined(__ANDROID__) || defined(ANDROID)
+          if (length > 4
+              &&buffer[length - 1] == 'k'
+              &&buffer[length - 2] == 'p'
+              &&buffer[length - 3] == 'a'
+              &&buffer[length - 4] == '.')
+          {
+            int fd = open(path, O_RDONLY);
+            char* begin;
+            char* p;
+
+            begin = mmap(0, offset, PROT_READ, MAP_SHARED, fd, 0);
+            p = begin + offset;
+
+            while (p >= begin) // scan backwards
+            {
+              if (*((uint32_t*)p) == 0x04034b50UL) // local file header found
+              {
+                uint16_t length_ = *((uint16_t*)(p + 26));
+
+                if (length + 2 + length_ < sizeof(buffer))
+                {
+                  memcpy(&buffer[length], "!/", 2);
+                  memcpy(&buffer[length + 2], p + 30, length_);
+                  length += 2 + length_;
+                }
+
+                break;
+              }
+
+              p -= 4;
+            }
+
+            munmap(begin, offset);
+            close(fd);
+          }
+#endif
           if (length <= capacity)
           {
             memcpy(out, resolved, length);
