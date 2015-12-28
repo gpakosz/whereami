@@ -258,7 +258,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
             char* begin;
             char* p;
 
-            begin = mmap(0, offset, PROT_READ, MAP_SHARED, fd, 0);
+            begin = (char*)mmap(0, offset, PROT_READ, MAP_SHARED, fd, 0);
             p = begin + offset;
 
             while (p >= begin) // scan backwards
@@ -267,7 +267,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
               {
                 uint16_t length_ = *((uint16_t*)(p + 26));
 
-                if (length + 2 + length_ < sizeof(buffer))
+                if (length + 2 + length_ < (int)sizeof(buffer))
                 {
                   memcpy(&buffer[length], "!/", 2);
                   memcpy(&buffer[length + 2], p + 30, length_);

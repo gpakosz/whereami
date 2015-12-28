@@ -30,7 +30,7 @@ buildir := $(realpath .)/build
 binsubdir := $(platform)-$(architecture)
 bindir := $(prefix)/bin/$(binsubdir)
 
-CFLAGS := -O2 -g
+CFLAGS := -O2 -g -Wall -pedantic -Werror
 
 ifeq ($(platform),linux)
 override LDFLAGS := $(LDFLAGS) -ldl
@@ -44,20 +44,30 @@ endif
 
 .PHONY: build-executable
 build: build-executable
-build-executable: $(bindir)/executable
+build-executable: $(bindir)/executable $(bindir)/executable-cpp
 
 $(bindir)/executable: $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/executable.c
 	mkdir -p $(@D)
 	$(CC) -o $@ -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fpic $(filter-out %.h,$^)
 	$(if $(postbuild),$(postbuild) $@)
 
+$(bindir)/executable-cpp: $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/executable.c
+	mkdir -p $(@D)
+	$(CC) -x c++ -o $@ -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fpic $(filter-out %.h,$^)
+	$(if $(postbuild),$(postbuild) $@)
+
 .PHONY: build-library
 build: build-library
-build-library: $(bindir)/library$(libsuffix)
+build-library: $(bindir)/library$(libsuffix) $(bindir)/library-cpp$(libsuffix)
 
 $(bindir)/library$(libsuffix): $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/library.c
 	mkdir -p $(@D)
 	$(CC) -shared -o $@ -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fpic $(filter-out %.h,$^)
+	$(if $(postbuild),$(postbuild) $@)
+
+$(bindir)/library-cpp$(libsuffix): $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/library.c
+	mkdir -p $(@D)
+	$(CC) -x c++ -shared -o $@ -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fpic $(filter-out %.h,$^)
 	$(if $(postbuild),$(postbuild) $@)
 
 clean:
