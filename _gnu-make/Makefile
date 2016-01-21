@@ -30,7 +30,8 @@ buildir := $(realpath .)/build
 binsubdir := $(platform)-$(architecture)
 bindir := $(prefix)/bin/$(binsubdir)
 
-CFLAGS := -O2 -g -Wall -pedantic -Werror
+CFLAGS := -O2 -g -Wall -pedantic -Werror -std=c99 -D_XOPEN_SOURCE=500
+CXXFLAGS := -O2 -g -Wall -pedantic -Werror
 
 ifeq ($(platform),linux)
 override LDFLAGS := $(LDFLAGS) -ldl
@@ -53,7 +54,7 @@ $(bindir)/executable: $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/ex
 
 $(bindir)/executable-cpp: $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/executable.c
 	mkdir -p $(@D)
-	$(CC) -x c++ -o $@ -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fpic $(filter-out %.h,$^)
+	$(CXX) -x c++ -o $@ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -fpic $(filter-out %.h,$^)
 	$(if $(postbuild),$(postbuild) $@)
 
 .PHONY: build-library
@@ -67,7 +68,7 @@ $(bindir)/library$(libsuffix): $(srcdir)/whereami.c $(srcdir)/whereami.h $(examp
 
 $(bindir)/library-cpp$(libsuffix): $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/library.c
 	mkdir -p $(@D)
-	$(CC) -x c++ -shared -o $@ -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fpic $(filter-out %.h,$^)
+	$(CXX) -x c++ -shared -o $@ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -fpic $(filter-out %.h,$^)
 	$(if $(postbuild),$(postbuild) $@)
 
 clean:
