@@ -30,10 +30,10 @@ buildir := $(realpath .)/build
 binsubdir := $(platform)-$(architecture)
 bindir := $(prefix)/bin/$(binsubdir)
 
-CFLAGS := -O2 -g -Wall -pedantic -Werror
+CFLAGS := -O2 -g -Wall -Werror
 
 ifeq ($(platform),linux)
-override LDFLAGS := $(LDFLAGS) -ldl
+override LDFLAGS := $(LDFLAGS) -ldl -lstdc++
 endif
 
 ifeq ($(platform),mac)
