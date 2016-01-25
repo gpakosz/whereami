@@ -47,9 +47,8 @@ static const char* dlerror(void)
   if (error)
   {
     static char message[1024];
-    DWORD length;
 
-    length = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, error, MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT), message, sizeof(message), NULL);
+    FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, error, MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT), message, sizeof(message), NULL);
 
     return message;
   }
