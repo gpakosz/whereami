@@ -30,11 +30,15 @@ buildir := $(realpath .)/build
 binsubdir := $(platform)-$(architecture)
 bindir := $(prefix)/bin/$(binsubdir)
 
-CFLAGS := -O2 -g -Wall -pedantic -Werror -std=c99 -D_XOPEN_SOURCE=500
+CFLAGS := -O2 -g -Wall -pedantic -Werror -std=c99
 CXXFLAGS := -O2 -g -Wall -pedantic -Werror
 
 ifeq ($(platform),linux)
 override LDFLAGS := $(LDFLAGS) -ldl
+CFLAGS +=-D_XOPEN_SOURCE=500
+endif
+ifeq ($(platform),mac)
+CFLAGS +=-D_DARWIN_C_SOURCE
 endif
 
 ifeq ($(platform),mac)
