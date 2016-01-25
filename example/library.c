@@ -55,8 +55,8 @@ static void unload()
 #define WIN32_LEAN_AND_MEAN
 #if defined(_MSC_VER)
 #pragma warning(push, 3)
-#include <windows.h>
 #endif
+#include <windows.h>
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
