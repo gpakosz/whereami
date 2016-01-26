@@ -69,7 +69,7 @@ You can customize the library's behavior by defining the following macros:
 
 ## Compiling for Windows
 
-There is a Visual Studio 2013 solution in the `_win-vs12/` folder.
+There is a Visual Studio 2015 solution in the `_win-vs14/` folder.
 
 ## Compiling for Linux or Mac
 
