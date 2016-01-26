@@ -76,6 +76,8 @@ int main(int argc, char** argv)
   if (length > 0)
   {
     path = (char*)malloc(length + 1);
+    if (!path)
+      abort();
     wai_getExecutablePath(path, length, &dirname_length);
     path[length] = '\0';
 
@@ -90,6 +92,8 @@ int main(int argc, char** argv)
   if (length > 0)
   {
     path = (char*)malloc(length + 1);
+    if (!path)
+      abort();
     wai_getModulePath(path, length, &dirname_length);
     path[length] = '\0';
 

@@ -58,7 +58,7 @@ extern "C" {
 
 static int WAI_PREFIX(getModulePath_)(HMODULE module, char* out, int capacity, int* dirname_length)
 {
-  wchar_t buffer1[MAX_PATH];
+  wchar_t buffer1[1];
   wchar_t buffer2[MAX_PATH];
   wchar_t* path = NULL;
   int length = -1;
@@ -77,15 +77,25 @@ static int WAI_PREFIX(getModulePath_)(HMODULE module, char* out, int capacity, i
       DWORD size_ = size;
       do
       {
+        wchar_t* path_;
+
+        path_ = (wchar_t*)WAI_REALLOC(path, sizeof(wchar_t) * size_ * 2);
+        if (!path_)
+          break;
         size_ *= 2;
-        path = (wchar_t*)WAI_REALLOC(path, sizeof(wchar_t) * size_);
-        size = GetModuleFileNameW(NULL, path, size_);
-      } while (size == size_);
+        path = path_;
+        size = GetModuleFileNameW(module, path, size_);
+      }
+      while (size == size_);
+
+      if (size == size_)
+        break;
     }
     else
       path = buffer1;
 
-    _wfullpath(buffer2, path, MAX_PATH);
+    if (!_wfullpath(buffer2, path, MAX_PATH))
+      break;
     length_ = WideCharToMultiByte(CP_UTF8, 0, buffer2, -1, out, capacity, NULL, NULL);
 
     if (length_ == 0)
