@@ -11,6 +11,7 @@ Supported platforms:
 - iOS
 - Android
 - QNX Neutrino
+- FreeBSD
 
 Just drop `whereami.h` and `whereami.c` into your build and get started. (see
 also [customizing compilation])

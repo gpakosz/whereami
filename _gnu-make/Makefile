@@ -24,6 +24,10 @@ ifeq ($(platform),)
       override CC := gcc
     endif
   endif
+  ifeq ($(__uname_s),freebsd)
+    override platform := freebsd
+    override architecture := $(__uname_m)
+  endif
 endif
 ifeq ($(architecture),)
   override architecture := unknown-architecture
@@ -41,12 +45,16 @@ CFLAGS := -O2 -g -Wall -pedantic -Werror -std=c99
 CXXFLAGS := -O2 -g -Wall -pedantic -Werror
 
 ifeq ($(platform),linux)
-override LDFLAGS := $(LDFLAGS) -ldl
+LDFLAGS += -ldl
 CFLAGS += -D_XOPEN_SOURCE=500 -fpic
 CXXFLAGS += -fpic
 endif
 ifeq ($(platform),mac)
 CFLAGS += -D_DARWIN_C_SOURCE
+endif
+ifeq ($(platform),freebsd)
+CFLAGS += -fpic
+CXXFLAGS += -fpic
 endif
 
 ifeq ($(platform),mac)
@@ -57,6 +65,9 @@ libsuffix := .so
 endif
 ifeq ($(platform),windows)
 libsuffix := .dll
+endif
+ifeq ($(platform),freebsd)
+libsuffix := .so
 endif
 
 .PHONY: build-executable
