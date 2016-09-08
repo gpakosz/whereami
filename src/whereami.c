@@ -66,7 +66,7 @@ static int WAI_PREFIX(getModulePath_)(HMODULE module, char* out, int capacity, i
   for (;;)
   {
     DWORD size;
-    int length_;
+    int length_, length__;
 
     size = GetModuleFileNameW(module, buffer1, sizeof(buffer1) / sizeof(buffer1[0]));
 
@@ -96,18 +96,19 @@ static int WAI_PREFIX(getModulePath_)(HMODULE module, char* out, int capacity, i
 
     if (!_wfullpath(buffer2, path, MAX_PATH))
       break;
-    length_ = WideCharToMultiByte(CP_UTF8, 0, buffer2, -1, out, capacity, NULL, NULL);
+    length_ = (int)wcslen(buffer2);
+    length__ = WideCharToMultiByte(CP_UTF8, 0, buffer2, length_ , out, capacity, NULL, NULL);
 
-    if (length_ == 0)
-      length_ = WideCharToMultiByte(CP_UTF8, 0, buffer2, -1, NULL, 0, NULL, NULL);
-    if (length_ == 0)
+    if (length__ == 0)
+      length__ = WideCharToMultiByte(CP_UTF8, 0, buffer2, length_, NULL, 0, NULL, NULL);
+    if (length__ == 0)
       break;
 
-    if (length_ <= capacity && dirname_length)
+    if (length__ <= capacity && dirname_length)
     {
       int i;
 
-      for (i = length_ - 1; i >= 0; --i)
+      for (i = length__ - 1; i >= 0; --i)
       {
         if (out[i] == '\\')
         {
@@ -117,7 +118,7 @@ static int WAI_PREFIX(getModulePath_)(HMODULE module, char* out, int capacity, i
       }
     }
 
-    length = length_;
+    length = length__;
 
     break;
   }
