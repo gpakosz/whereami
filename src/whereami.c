@@ -58,7 +58,7 @@ extern "C" {
 
 static int WAI_PREFIX(getModulePath_)(HMODULE module, char* out, int capacity, int* dirname_length)
 {
-  wchar_t buffer1[1];
+  wchar_t buffer1[MAX_PATH];
   wchar_t buffer2[MAX_PATH];
   wchar_t* path = NULL;
   int length = -1;
