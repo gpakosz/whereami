@@ -76,12 +76,12 @@ build-executable: $(bindir)/executable $(bindir)/executable-cpp
 
 $(bindir)/executable: $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/executable.c
 	mkdir -p $(@D)
-	$(CC) -o $@ -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(filter-out %.h,$^)
+	$(CC) -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -o $@
 	$(if $(postbuild),$(postbuild) $@)
 
 $(bindir)/executable-cpp: $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/executable.c
 	mkdir -p $(@D)
-	$(CXX) -x c++ -o $@ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(filter-out %.h,$^)
+	$(CXX) -x c++ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -o $@
 	$(if $(postbuild),$(postbuild) $@)
 
 .PHONY: build-library
@@ -90,12 +90,12 @@ build-library: $(bindir)/library$(libsuffix) $(bindir)/library-cpp$(libsuffix)
 
 $(bindir)/library$(libsuffix): $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/library.c
 	mkdir -p $(@D)
-	$(CC) -shared -o $@ -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(filter-out %.h,$^)
+	$(CC) -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -shared -o $@
 	$(if $(postbuild),$(postbuild) $@)
 
 $(bindir)/library-cpp$(libsuffix): $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/library.c
 	mkdir -p $(@D)
-	$(CXX) -x c++ -shared -o $@ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(filter-out %.h,$^)
+	$(CXX) -x c++ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -shared -o $@
 	$(if $(postbuild),$(postbuild) $@)
 
 clean:
