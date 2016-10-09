@@ -36,7 +36,7 @@ Example usage:
 
 Here is the output of the example:
 
-    $ make -C _gnu-make
+    $ make -j -C _gnu-make
     $ cp ./bin/mac-x86_64/library.dylib /tmp/
     $ ./bin/mac-x86_64/executable --load-library=/tmp/library.dylib
 
@@ -76,7 +76,7 @@ There is a Visual Studio 2015 solution in the `_win-vs14/` folder.
 
 There is a GNU Make 3.81 `MakeFile` in the `_gnu-make/` folder:
 
-    $ make -C _gnu-make/
+    $ make -j -C _gnu-make/
 
 ## Compiling for Mac
 
@@ -90,7 +90,7 @@ There is an Xcode project located in the `_ios-xcode/` folder.
 If you prefer compiling from command line and deploying to a jailbroken device
 through SSH, use:
 
-    $ make -C _gnu-make/ binsubdir=ios CC="$(xcrun --sdk iphoneos --find clang) -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -arch armv7 -arch armv7s -arch arm64" postbuild="codesign -s 'iPhone Developer'"
+    $ make -j -C _gnu-make/ binsubdir=ios CC="$(xcrun --sdk iphoneos --find clang) -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -arch armv7 -arch armv7s -arch arm64" postbuild="codesign -s 'iPhone Developer'"
 
 ## Compiling for Android
 
@@ -101,11 +101,25 @@ trailing `/` character).
 Next, the easy way is to make a standalone Android toolchain with the following
 command:
 
-    $ $NDK_ROOT/build/tools/make-standalone-toolchain.sh --system=$(uname -s | tr [A-Z] [a-z])-$(uname -m) --platform=android-3 --arch=arm --install-dir=/tmp/android
+    $ $NDK_ROOT/build/tools/make_standalone_toolchain.py --arch=arm --install-dir=/tmp/android-toolchain
 
-Now you can compile the self test and self benchmark programs by running:
+Now you can compile the example by running:
 
-    $ make -C _gnu-make/ libsuffix=.so binsubdir=android CC=/tmp/android/bin/arm-linux-androideabi-gcc CFLAGS='-march=armv7-a -mfloat-abi=softfp -O2'
+    $ make -j -C _gnu-make/ libsuffix=.so binsubdir=android CC=/tmp/android-toolchain/bin/arm-linux-androideabi-gcc CXX=/tmp/android-toolchain/bin/arm-linux-androideabi-g++
+
+Depending on whether you compile for an Android version that requires PIE
+executables, add `CFLAGS='-fpie' CXXFLAGS='-fpie' LDFLAGS='-pie'` accordingly.
+
+Loading page aligned library straight from APKs is supported. To test, use the
+following:
+
+    $ zip -Z store app bin/android/library.so
+    $ zipalign -v -f -p 4 ./app.zip ./app.apk
+
+Then copy `bin/android/executable` and `app.apk` to your Android device and
+there launch:
+
+    $ ./executable --load-library=app.apk!/bin/android/library.so
 
 --------------------------------------------------------------------------------
 
