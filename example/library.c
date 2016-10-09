@@ -43,7 +43,6 @@ static void load()
 }
 
 #if defined(__GNUC__) && !defined(_WIN32)
-__attribute__((constructor))
 __attribute__((destructor))
 #endif
 static void unload()
