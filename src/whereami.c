@@ -546,7 +546,8 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
   return length;
 }
 
-#elif defined(__FreeBSD__)
+#elif defined(__DragonFly__) || defined(__FreeBSD__) || \
+      defined(__FreeBSD_kernel__) || defined(__NetBSD__)
 
 #include <limits.h>
 #include <stdlib.h>
