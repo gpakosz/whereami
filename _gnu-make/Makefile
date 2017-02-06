@@ -28,6 +28,10 @@ ifeq ($(platform),)
     override platform := freebsd
     override architecture := $(__uname_m)
   endif
+	ifeq ($(findstring cygwin,$(__uname_s)),cygwin)
+		override platform := cygwin
+		override architecture := $(__uname_m)
+	endif
 endif
 ifeq ($(architecture),)
   override architecture := unknown-architecture
@@ -56,6 +60,11 @@ ifeq ($(platform),freebsd)
 CFLAGS += -fpic
 CXXFLAGS += -fpic
 endif
+ifeq ($(platform),cygwin)
+LDFLAGS += -ldl
+CFLAGS += -D_XOPEN_SOURCE=500 -fpic
+CXXFLAGS += -fpic
+endif
 
 ifeq ($(platform),mac)
 libsuffix := .dylib
@@ -68,6 +77,9 @@ libsuffix := .dll
 endif
 ifeq ($(platform),freebsd)
 libsuffix := .so
+endif
+ifeq ($(platform),cygwin)
+libsuffix := .dll
 endif
 
 .PHONY: build-executable

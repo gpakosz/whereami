@@ -158,7 +158,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
   return length;
 }
 
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__CYGWIN__)
 
 #include <stdio.h>
 #include <stdlib.h>
