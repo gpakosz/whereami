@@ -10,6 +10,13 @@
 extern "C" {
 #endif
 
+#ifndef WAI_FUNCSPEC
+  #define WAI_FUNCSPEC
+#endif
+#ifndef WAI_PREFIX
+#define WAI_PREFIX(function) wai_##function
+#endif
+
 #if !defined(WAI_MALLOC) || !defined(WAI_FREE) || !defined(WAI_REALLOC)
 #include <stdlib.h>
 #endif

@@ -84,28 +84,48 @@ endif
 
 .PHONY: build-executable
 build: build-executable
-build-executable: $(bindir)/executable $(bindir)/executable-cpp
+build-executable: $(bindir)/executable $(bindir)/executable-as-cxx $(bindir)/executable-as-cxx11 $(bindir)/executable-cxx $(bindir)/executable-cxx11
 
 $(bindir)/executable: $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/executable.c
 	mkdir -p $(@D)
 	$(CC) -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -o $@
 	$(if $(postbuild),$(postbuild) $@)
 
-$(bindir)/executable-cpp: $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/executable.c
+$(bindir)/executable-as-cxx: $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/executable.c
 	mkdir -p $(@D)
-	$(CXX) -x c++ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -o $@
+	$(CXX) -std=c++03 -x c++ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -o $@
+	$(if $(postbuild),$(postbuild) $@)
+
+$(bindir)/executable-as-cxx11: $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/executable.c
+	mkdir -p $(@D)
+	$(CXX) -std=c++11 -x c++ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -o $@
+	$(if $(postbuild),$(postbuild) $@)
+
+$(bindir)/executable-cxx: $(srcdir)/whereami++.cpp $(srcdir)/whereami++.h $(exampledir)/executable.cpp
+	mkdir -p $(@D)
+	$(CXX) -std=c++03 -x c++ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -o $@
+	$(if $(postbuild),$(postbuild) $@)
+
+$(bindir)/executable-cxx11: $(srcdir)/whereami++.cpp $(srcdir)/whereami++.h $(exampledir)/executable.cpp
+	mkdir -p $(@D)
+	$(CXX) -std=c++11 -x c++ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -o $@
 	$(if $(postbuild),$(postbuild) $@)
 
 .PHONY: build-library
 build: build-library
-build-library: $(bindir)/library$(libsuffix) $(bindir)/library-cpp$(libsuffix)
+build-library: $(bindir)/library$(libsuffix) $(bindir)/library-as-cxx$(libsuffix) $(bindir)/library-cxx$(libsuffix)
 
 $(bindir)/library$(libsuffix): $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/library.c
 	mkdir -p $(@D)
 	$(CC) -I $(srcdir) $(CPPFLAGS) $(CFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -shared -o $@
 	$(if $(postbuild),$(postbuild) $@)
 
-$(bindir)/library-cpp$(libsuffix): $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/library.c
+$(bindir)/library-as-cxx$(libsuffix): $(srcdir)/whereami.c $(srcdir)/whereami.h $(exampledir)/library.c
+	mkdir -p $(@D)
+	$(CXX) -x c++ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -shared -o $@
+	$(if $(postbuild),$(postbuild) $@)
+
+$(bindir)/library-cxx$(libsuffix): $(srcdir)/whereami++.cpp $(srcdir)/whereami++.h $(exampledir)/library.cpp
 	mkdir -p $(@D)
 	$(CXX) -x c++ -I $(srcdir) $(CPPFLAGS) $(CXXFLAGS) $(filter-out %.h,$^) $(LDFLAGS) -shared -o $@
 	$(if $(postbuild),$(postbuild) $@)
