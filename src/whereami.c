@@ -158,7 +158,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
   return length;
 }
 
-#elif defined(__linux__) || defined(__CYGWIN__)
+#elif defined(__linux__) || defined(__CYGWIN__) || defined(__sun)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -170,7 +170,11 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 #include <inttypes.h>
 
 #if !defined(WAI_PROC_SELF_EXE)
+#if defined(__sun)
+#define WAI_PROC_SELF_EXE "/proc/self/path/a.out"
+#else
 #define WAI_PROC_SELF_EXE "/proc/self/exe"
+#endif
 #endif
 
 WAI_FUNCSPEC
@@ -217,7 +221,11 @@ int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
 #endif
 
 #if !defined(WAI_PROC_SELF_MAPS)
+#if defined(__sun)
+#define WAI_PROC_SELF_MAPS "/proc/self/map"
+#else
 #define WAI_PROC_SELF_MAPS "/proc/self/maps"
+#endif
 #endif
 
 #if defined(__ANDROID__) || defined(ANDROID)
