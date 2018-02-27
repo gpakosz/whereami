@@ -127,7 +127,4 @@ there launch:
 If you find this library useful and decide to use it in your own projects please
 drop me a line [@gpakosz].
 
-If you use it in a commercial project, consider using [Gittip].
-
 [@gpakosz]: https://twitter.com/gpakosz
-[Gittip]: https://www.gittip.com/gpakosz/
