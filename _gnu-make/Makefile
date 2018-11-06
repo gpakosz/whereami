@@ -45,8 +45,8 @@ buildir := $(realpath .)/build
 binsubdir := $(platform)-$(architecture)
 bindir := $(prefix)/bin/$(binsubdir)
 
-CFLAGS := -O2 -g -Wall -pedantic -Werror -std=c99
-CXXFLAGS := -O2 -g -Wall -pedantic -Werror
+CFLAGS := -O2 -g -Wall -pedantic -Werror -Wshadow -std=c99
+CXXFLAGS := -O2 -g -Wall -pedantic -Werror -Wshadow -Wuseless-cast
 
 ifeq ($(platform),linux)
 LDFLAGS += -ldl

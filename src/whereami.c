@@ -129,15 +129,13 @@ static int WAI_PREFIX(getModulePath_)(HMODULE module, char* out, int capacity, i
   return length;
 }
 
-WAI_NOINLINE
-WAI_FUNCSPEC
+WAI_NOINLINE WAI_FUNCSPEC
 int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
 {
   return WAI_PREFIX(getModulePath_)(NULL, out, capacity, dirname_length);
 }
 
-WAI_NOINLINE
-WAI_FUNCSPEC
+WAI_NOINLINE WAI_FUNCSPEC
 int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 {
   HMODULE module;
@@ -238,15 +236,13 @@ int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
 #include <unistd.h>
 #endif
 
-WAI_NOINLINE
-WAI_FUNCSPEC
+WAI_NOINLINE WAI_FUNCSPEC
 int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 {
   int length = -1;
   FILE* maps = NULL;
-  int i;
 
-  for (i = 0; i < WAI_PROC_SELF_MAPS_RETRY; ++i)
+  for (int r = 0; r < WAI_PROC_SELF_MAPS_RETRY; ++r)
   {
     maps = fopen(WAI_PROC_SELF_MAPS, "r");
     if (!maps)
@@ -267,7 +263,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 
       if (sscanf(buffer, "%" PRIx64 "-%" PRIx64 " %s %" PRIx64 " %x:%x %u %s\n", &low, &high, perms, &offset, &major, &minor, &inode, path) == 8)
       {
-        uint64_t addr = (uint64_t)(uintptr_t)WAI_RETURN_ADDRESS();
+        uint64_t addr = (uintptr_t)WAI_RETURN_ADDRESS();
         if (low <= addr && addr <= high)
         {
           char* resolved;
@@ -339,10 +335,14 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
     }
 
     fclose(maps);
+    maps = NULL;
 
     if (length != -1)
       break;
   }
+
+  if (maps)
+    fclose(maps);
 
   return length;
 }
@@ -408,8 +408,7 @@ int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
   return length;
 }
 
-WAI_NOINLINE
-WAI_FUNCSPEC
+WAI_NOINLINE WAI_FUNCSPEC
 int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 {
   char buffer[PATH_MAX];
@@ -619,8 +618,7 @@ int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
   return length;
 }
 
-WAI_NOINLINE
-WAI_FUNCSPEC
+WAI_NOINLINE WAI_FUNCSPEC
 int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 {
   char buffer[PATH_MAX];
