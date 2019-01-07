@@ -12,6 +12,8 @@ Supported platforms:
 - Android
 - QNX Neutrino
 - FreeBSD
+- NetBSD
+- DragonFly BSD
 - SunOS
 
 Just drop `whereami.h` and `whereami.c` into your build and get started. (see
