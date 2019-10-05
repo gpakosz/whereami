@@ -50,6 +50,9 @@ if(BUILD_EXAMPLES)
   endif()
 endif()
 
+install(FILES ${CMAKE_SOURCE_DIR}/src/whereami.h COMPONENT headers
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
 if(PKG_CONFIG_FOUND)
   configure_file(${CMAKE_SOURCE_DIR}/pkgconfig/whereami.pc.in ${CMAKE_BINARY_DIR}/whereami.pc)
   install(FILES ${CMAKE_BINARY_DIR}/whereami.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
@@ -106,4 +109,7 @@ if(CMAKE_CXX_COMPILER)
     configure_file(${CMAKE_SOURCE_DIR}/pkgconfig/whereamipp.pc.in ${CMAKE_BINARY_DIR}/whereamipp.pc)
     install(FILES ${CMAKE_BINARY_DIR}/whereamipp.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
   endif()
+
+  install(FILES ${CMAKE_SOURCE_DIR}/src/whereami++.h COMPONENT headers
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
