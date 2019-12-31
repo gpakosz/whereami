@@ -120,10 +120,3 @@ Then copy `bin/android/executable` and `app.apk` to your Android device and
 there launch:
 
     $ ./executable --load-library=$PWD/app.apk!/bin/android/library.so
-
---------------------------------------------------------------------------------
-
-If you find this library useful and decide to use it in your own projects please
-drop me a line [@gpakosz].
-
-[@gpakosz]: https://twitter.com/gpakosz
