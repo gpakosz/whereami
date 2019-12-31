@@ -45,25 +45,33 @@ buildir := $(realpath .)/build
 binsubdir := $(platform)-$(architecture)
 bindir := $(prefix)/bin/$(binsubdir)
 
-CFLAGS := -O2 -g -Wall -pedantic -Werror -Wshadow -std=c99
-CXXFLAGS := -O2 -g -Wall -pedantic -Werror -Wshadow -Wuseless-cast
+override CFLAGS += -O2 -g -Wall -pedantic -Werror -Wshadow -std=c99
+override CXXFLAGS += -O2 -g -Wall -pedantic -Werror -Wshadow
+
+ifeq ($(shell printf "int main(int argc, char* argv[]) { return 0; }\n" | $(CXX) -x c++ -o /dev/null -Wuseless-cast -Werror - 2> /dev/null && echo 'ok'),ok)
+  override CXXFLAGS += -Wuseless-cast
+endif
 
 ifeq ($(platform),linux)
-LDFLAGS += -ldl
-CFLAGS += -D_XOPEN_SOURCE=500 -fpic
-CXXFLAGS += -fpic
+override LDFLAGS += -ldl
+override CFLAGS += -D_XOPEN_SOURCE=500 -fpic
+override CXXFLAGS += -fpic
 endif
 ifeq ($(platform),mac)
-CFLAGS += -D_DARWIN_C_SOURCE
+override CFLAGS += -D_DARWIN_C_SOURCE
 endif
 ifeq ($(platform),freebsd)
-CFLAGS += -fpic
-CXXFLAGS += -fpic
+override CFLAGS += -fpic
+override CXXFLAGS += -fpic
 endif
 ifeq ($(platform),cygwin)
-LDFLAGS += -ldl
-CFLAGS += -D_XOPEN_SOURCE=500 -fpic
-CXXFLAGS += -fpic
+override LDFLAGS += -ldl
+override CFLAGS += -D_XOPEN_SOURCE=500 -fpic
+override CXXFLAGS += -fpic
+endif
+ifeq ($(platform),android)
+override CFLAGS += -fpie -pie
+override CXXFLAGS += -fpie -pie
 endif
 
 ifeq ($(platform),mac)
@@ -80,6 +88,12 @@ libsuffix := .so
 endif
 ifeq ($(platform),cygwin)
 libsuffix := .dll
+endif
+ifeq ($(platform),android)
+libsuffix := .so
+endif
+ifeq ($(platform),linux)
+libsuffix := .so
 endif
 
 .PHONY: build-executable

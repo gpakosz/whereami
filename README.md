@@ -104,14 +104,11 @@ trailing `/` character).
 Next, the easy way is to make a standalone Android toolchain with the following
 command:
 
-    $ $NDK_ROOT/build/tools/make_standalone_toolchain.py --arch=arm --install-dir=/tmp/android-toolchain
+    $ $NDK_ROOT/build/tools/make_standalone_toolchain.py --arch=arm64 --api 21 --install-dir=/tmp/android-toolchain
 
 Now you can compile the example by running:
 
-    $ make -j -C _gnu-make/ libsuffix=.so binsubdir=android CC=/tmp/android-toolchain/bin/arm-linux-androideabi-gcc CXX=/tmp/android-toolchain/bin/arm-linux-androideabi-g++
-
-Depending on whether you compile for an Android version that requires PIE
-executables, add `CFLAGS='-fpie' CXXFLAGS='-fpie' LDFLAGS='-pie'` accordingly.
+    $ make -j -C _gnu-make/ platform=android architecture=arm64 CC=/tmp/android-toolchain/bin/aarch64-linux-android-gcc CXX=/tmp/android-toolchain/bin/aarch64-linux-android-g++
 
 Loading page aligned library straight from APKs is supported. To test, use the
 following:
@@ -122,7 +119,7 @@ following:
 Then copy `bin/android/executable` and `app.apk` to your Android device and
 there launch:
 
-    $ ./executable --load-library=app.apk!/bin/android/library.so
+    $ ./executable --load-library=$PWD/app.apk!/bin/android/library.so
 
 --------------------------------------------------------------------------------
 
