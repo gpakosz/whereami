@@ -169,7 +169,11 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
   return length;
 }
 
-#elif defined(__linux__) || defined(__CYGWIN__) || defined(__sun) || defined(WAI_USE_PROC_SELF_EXE)
+#elif defined(__linux__) || defined(__CYGWIN__) || defined(__sun) || defined(__GNU__) || defined(WAI_USE_PROC_SELF_EXE)
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -191,6 +195,10 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 #else
 #define WAI_PROC_SELF_EXE "/proc/self/exe"
 #endif
+#endif
+
+#ifndef PATH_MAX
+#define PATH_MAX 4096
 #endif
 
 WAI_FUNCSPEC
