@@ -285,12 +285,21 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
               &&buffer[length - 4] == '.')
           {
             int fd = open(path, O_RDONLY);
-            char* begin;
-            char* p;
+            if (fd == -1)
+            {
+              length = -1; // retry
+              break;
+            }
 
-            begin = (char*)mmap(0, offset, PROT_READ, MAP_SHARED, fd, 0);
-            p = begin + offset - 30; // minimum size of local file header
+            char* begin = (char*)mmap(0, offset, PROT_READ, MAP_SHARED, fd, 0);
+            if (begin == MAP_FAILED)
+            {
+              close(fd);
+              length = -1; // retry
+              break;
+            }
 
+            char* p = begin + offset - 30; // minimum size of local file header
             while (p >= begin) // scan backwards
             {
               if (*((uint32_t*)p) == 0x04034b50UL) // local file header signature found
