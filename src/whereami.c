@@ -288,12 +288,12 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
             char* begin;
             char* p;
 
-            begin = (char*)mmap(0, offset + sizeof(p), PROT_READ, MAP_SHARED, fd, 0);
-            p = begin + offset;
+            begin = (char*)mmap(0, offset, PROT_READ, MAP_SHARED, fd, 0);
+            p = begin + offset - 30; // minimum size of local file header
 
             while (p >= begin) // scan backwards
             {
-              if (*((uint32_t*)p) == 0x04034b50UL) // local file header found
+              if (*((uint32_t*)p) == 0x04034b50UL) // local file header signature found
               {
                 uint16_t length_ = *((uint16_t*)(p + 26));
 
