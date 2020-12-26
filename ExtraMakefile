@@ -1,0 +1,80 @@
+# This file contains stuff that I run in order to test how these
+# builds work.  I haven't found a way to consistently integrate
+# them into something like Makefile.am
+
+MAKEFILE_PATH = $(strip $(dir $(firstword $(MAKEFILE_LIST))))
+
+.PHONY: initialize_project
+initialize_project:
+	autoreconf --install
+	libtoolize
+	automake --add-missing
+	autoreconf -fi
+
+.PHONY: build_clean
+build_clean:
+	-cd "$(MAKEFILE_PATH)/build" && make distclean
+	-rm -r "$(MAKEFILE_PATH)/build/"*
+
+.PHONY: test_project_build
+test_project_build:
+	mkdir -p "$(MAKEFILE_PATH)/build"
+	cd "$(MAKEFILE_PATH)/build" && \
+	../configure --prefix="$$(pwd)/install" && \
+	make distcheck && \
+	make dist-gzip && \
+	debmake -a whereami-*.tar.gz -i "debuild -i -us -uc -b"
+
+
+.PHONY: debug_build
+# These flags are recommended if / when you use valgrind, or GDB
+debug_build:
+	cd "$(MAKEFILE_PATH)/debug" && \
+	../configure --prefix="$$(pwd)/install" \
+		CPPFLAGS=-DDEBUG CFLAGS="-g -O0" && \
+	make && \
+	make install
+
+.PHONY: debug_run
+# In gdb:
+#	layout next
+#	list
+#	run
+#
+# Commands
+#	break (main, or whatever subroutine)
+# 	refresh - redraw the screen
+#  	ctrl + c - halt
+# 	n (next) - next line
+# 	step - descend
+debug_run:
+	cd "$(MAKEFILE_PATH)/debug/install/bin/" && \
+	gdb whereami
+
+.PHONY: debug_run_valgrind
+debug_run_valgrind:
+	cd "$(MAKEFILE_PATH)/debug/install/bin/" && \
+	valgrind ./whereami_runner
+	
+
+.PHONY: debug_clean
+debug_clean:
+	-cd "$(MAKEFILE_PATH)/debug" && make distclean
+	-rm -r "$(MAKEFILE_PATH)/debug/"*
+
+.PHONY: test_c_project_all_automatic
+test_c_project_all_automatic: \
+	test_c_project_valgrind \
+	test_c_project_project_build
+	
+.PHONY: test_c_project_valgrind
+test_c_project_valgrind: \
+	debug_clean \
+	debug_build \
+	debug_run_valgrind
+
+.PHONY: test_c_project_project_build
+test_c_project_project_build: \
+	debug_clean \
+	test_project_build
+

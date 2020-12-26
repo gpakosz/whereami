@@ -1,0 +1,77 @@
+\input texinfo   @c -*-texinfo-*-
+@comment $Id@w{$}
+@comment %**start of header
+@setfilename whereami.info
+@include version.texi
+@settitle GNU Sample @value{VERSION}
+@syncodeindex pg cp
+@comment %**end of header
+@copying
+This manual is for GNU Sample (version @value{VERSION}, @value{UPDATED}),
+which is an example in the Texinfo documentation.
+
+Copyright @copyright{} 2016 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled
+``GNU Free Documentation License''.
+@end quotation
+@end copying
+
+@dircategory Texinfo documentation system
+@direntry
+* sample: (sample)Invoking sample.
+@end direntry
+
+@titlepage
+@title GNU Sample
+@subtitle for version @value{VERSION}, @value{UPDATED}
+@author A.U. Thor (@email{bug-sample@@gnu.org})
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top GNU Sample
+
+This manual is for GNU Sample (version @value{VERSION}, @value{UPDATED}).
+@end ifnottex
+
+@menu
+* Invoking sample::
+* GNU Free Documentation License::
+* Index::
+@end menu
+
+
+@node Invoking sample
+@chapter Invoking sample
+
+@pindex sample
+@cindex invoking @command{sample}
+
+This is a sample manual.  There is no sample program to
+invoke, but if there were, you could see its basic usage
+and command line options here.
+
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+
+@comment @include fdl.texi
+
+
+@node Index
+@unnumbered Index
+
+@printindex cp
+
+@bye
