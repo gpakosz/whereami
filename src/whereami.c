@@ -599,7 +599,7 @@ int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
 #endif
     size_t size = sizeof(buffer1);
 
-    if (sysctl(mib, (u_int)(sizeof(mib) / sizeof(mib[0])), path, &size, NULL, 0) != 0)
+    if (sysctl(mib, 4, path, &size, NULL, 0) != 0)
         break;
 
     resolved = realpath(path, buffer2);
