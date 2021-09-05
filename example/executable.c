@@ -72,7 +72,7 @@ int main(int argc, char** argv)
   int length, dirname_length;
   int i;
 
-  length = wai_getExecutablePath(NULL, 0, &dirname_length);
+  length = wai_getExecutablePath(NULL, 0, NULL);
   if (length > 0)
   {
     path = (char*)malloc(length + 1);
