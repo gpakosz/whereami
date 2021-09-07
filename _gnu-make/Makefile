@@ -28,10 +28,14 @@ ifeq ($(platform),)
     override platform := freebsd
     override architecture := $(__uname_m)
   endif
-	ifeq ($(findstring cygwin,$(__uname_s)),cygwin)
-		override platform := cygwin
-		override architecture := $(__uname_m)
-	endif
+  ifeq ($(__uname_s),openbsd)
+    override platform := openbsd
+    override architecture := $(__uname_m)
+  endif
+  ifeq ($(findstring cygwin,$(__uname_s)),cygwin)
+    override platform := cygwin
+    override architecture := $(__uname_m)
+  endif
 endif
 ifeq ($(architecture),)
   override architecture := unknown-architecture

@@ -572,7 +572,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 }
 
 #elif defined(__DragonFly__) || defined(__FreeBSD__) || \
-      defined(__FreeBSD_kernel__) || defined(__NetBSD__)
+      defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
 
 #include <limits.h>
 #include <stdlib.h>
@@ -580,6 +580,116 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <dlfcn.h>
+
+#if defined(__OpenBSD__)
+
+#include <unistd.h>
+
+WAI_FUNCSPEC
+int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
+{
+  char buffer1[4096];
+  char buffer2[PATH_MAX];
+  char buffer3[PATH_MAX];
+  char** argv = (char**)buffer1;
+  char* resolved = NULL;
+  int length = -1;
+
+  for (;;)
+  {
+    int mib[4] = { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
+    size_t size;
+
+    if (sysctl(mib, 4, NULL, &size, NULL, 0) != 0)
+        break;
+
+    if (size > sizeof(buffer1))
+    {
+      argv = (char**)WAI_MALLOC(size);
+      if (!argv)
+        break;
+    }
+
+    if (sysctl(mib, 4, argv, &size, NULL, 0) != 0)
+        break;
+
+    if (strchr(argv[0], '/'))
+    {
+      resolved = realpath(argv[0], buffer2);
+      if (!resolved)
+        break;
+    }
+    else
+    {
+      const char* PATH = getenv("PATH");
+      if (!PATH)
+        break;
+
+      size_t argv0_length = strlen(argv[0]);
+
+      const char* begin = PATH;
+      while (1)
+      {
+        const char* separator = strchr(begin, ':');
+        const char* end = separator ? separator : begin + strlen(begin);
+
+        if (end - begin > 0)
+        {
+          if (*(end -1) == '/')
+            --end;
+
+          if (((end - begin) + 1 + argv0_length + 1) <= sizeof(buffer2))
+          {
+            memcpy(buffer2, begin, end - begin);
+            buffer2[end - begin] = '/';
+            memcpy(buffer2 + (end - begin) + 1, argv[0], argv0_length + 1);
+
+            resolved = realpath(buffer2, buffer3);
+            if (resolved)
+              break;
+          }
+        }
+
+        if (!separator)
+          break;
+
+        begin = ++separator;
+      }
+
+      if (!resolved)
+        break;
+    }
+
+    length = (int)strlen(resolved);
+    if (length <= capacity)
+    {
+      memcpy(out, resolved, length);
+
+      if (dirname_length)
+      {
+        int i;
+
+        for (i = length - 1; i >= 0; --i)
+        {
+          if (out[i] == '/')
+          {
+            *dirname_length = i;
+            break;
+          }
+        }
+      }
+    }
+
+    break;
+  }
+
+  if (argv != (char**)buffer1)
+    WAI_FREE(argv);
+
+  return length;
+}
+
+#else
 
 WAI_FUNCSPEC
 int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
@@ -629,11 +739,10 @@ int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
     break;
   }
 
-  if (path != buffer1)
-    WAI_FREE(path);
-
   return length;
 }
+
+#endif
 
 WAI_NOINLINE WAI_FUNCSPEC
 int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)

@@ -15,6 +15,7 @@ Supported platforms:
 - NetBSD
 - DragonFly BSD
 - SunOS
+- OpenBSD
 
 Just drop `whereami.h` and `whereami.c` into your build and get started. (see
 also [customizing compilation])
