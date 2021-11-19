@@ -785,6 +785,112 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
   return length;
 }
 
+#elif defined(_AIX)
+
+#include <dlfcn.h>
+#include <procinfo.h>
+#include <sys/ldr.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
+
+WAI_NOINLINE WAI_FUNCSPEC int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length);
+
+WAI_FUNCSPEC
+int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
+{
+  /* We assume that this gets called before the program would potentially change the work dir */
+  struct procsinfo processBuffer;
+  processBuffer.pi_pid = getpid();
+  size_t argsBufferLength = 64*1024;
+  char *argsBuffer = (char *)WAI_MALLOC(argsBufferLength);
+  char *realpathBuffer = (char *)WAI_MALLOC(PATH_MAX);
+  if (!argsBuffer || !realpathBuffer)
+    goto error;
+
+  if (getargs(&processBuffer, sizeof(processBuffer), argsBuffer, argsBufferLength) != 0)
+    goto error;
+
+  const char *firstNullPosition = memchr(argsBuffer, 0, argsBufferLength);
+  if (!firstNullPosition || firstNullPosition == argsBuffer)
+    goto error;
+
+  const char *fullPath = realpath(argsBuffer, realpathBuffer);
+  if (!fullPath || strlen(fullPath) >= capacity)
+    goto error;
+
+  strcpy(out, fullPath);
+  WAI_FREE(argsBuffer);
+  WAI_FREE(realpathBuffer);
+  if (dirname_length) {
+    *dirname_length = strrchr(out, '/') - out;
+  }
+  return strlen(out);
+
+error:
+  WAI_FREE(argsBuffer);
+  WAI_FREE(realpathBuffer);
+  return -1;
+}
+
+WAI_NOINLINE WAI_FUNCSPEC
+int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
+{
+	char *allocedMem = NULL;
+	int allocSize = 64*1024;
+	struct ld_info *info = NULL;
+  int length = -1;
+  int retcode = -1;
+  for (; allocSize <= 1024*1024; allocSize *= 2) {
+    allocedMem = (char *)WAI_MALLOC(allocSize);
+    if (!allocedMem) {
+      return -1;
+    }
+    retcode = loadquery(L_GETINFO, allocedMem, allocSize);
+    info = (struct ld_info *)allocedMem;
+    if (retcode != -1 || errno != ENOMEM)
+      break;
+    WAI_FREE(allocedMem);
+    allocedMem = NULL;
+  }
+
+	if (retcode != -1) {
+    void *addressInLib = WAI_RETURN_ADDRESS();
+    for(;;) {
+      if (info->ldinfo_textorg < addressInLib && (info->ldinfo_textorg + info->ldinfo_textsize) > addressInLib) {
+        char *resolved = info->ldinfo_filename;
+        length = (int)strlen(resolved);
+        if (length <= capacity)
+        {
+          memcpy(out, resolved, length);
+
+          if (dirname_length)
+          {
+            int i;
+
+            for (i = length - 1; i >= 0; --i)
+            {
+              if (out[i] == '/')
+              {
+                *dirname_length = i;
+                break;
+              }
+            }
+          }
+        }
+        break;
+      }
+      if (!info->ldinfo_next)
+        break;
+      info = (struct ld_info *)((char *)info + info->ldinfo_next);
+    }
+	}
+	if (allocedMem) {
+		munmap(allocedMem, allocSize);
+	}
+	return length;
+}
+
 #else
 
 #error unsupported platform
