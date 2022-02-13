@@ -58,11 +58,8 @@ endif
 
 ifeq ($(platform),linux)
 override LDFLAGS += -ldl
-override CFLAGS += -D_XOPEN_SOURCE=500 -fpic
+override CFLAGS += -fpic
 override CXXFLAGS += -fpic
-endif
-ifeq ($(platform),mac)
-override CFLAGS += -D_DARWIN_C_SOURCE
 endif
 ifeq ($(platform),freebsd)
 override CFLAGS += -fpic
@@ -70,7 +67,7 @@ override CXXFLAGS += -fpic
 endif
 ifeq ($(platform),cygwin)
 override LDFLAGS += -ldl
-override CFLAGS += -D_XOPEN_SOURCE=500 -fpic
+override CFLAGS += -fpic
 override CXXFLAGS += -fpic
 endif
 ifeq ($(platform),android)
