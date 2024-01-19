@@ -6,7 +6,7 @@
 #if defined(__GNUC__) && !defined(_WIN32)
 __attribute__((constructor))
 #endif
-static void load()
+static void load(void)
 {
   char* path = NULL;
   int length, dirname_length;
@@ -45,7 +45,7 @@ static void load()
 #if defined(__GNUC__) && !defined(_WIN32)
 __attribute__((destructor))
 #endif
-static void unload()
+static void unload(void)
 {
   printf("library unloaded\n");
 }
