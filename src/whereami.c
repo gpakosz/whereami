@@ -169,7 +169,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
   return length;
 }
 
-#elif defined(__linux__) || defined(__CYGWIN__) || defined(__sun) || defined(WAI_USE_PROC_SELF_EXE)
+#elif defined(__linux__) || defined(__CYGWIN__) || defined(__sun) || defined(__serenity__) || defined(WAI_USE_PROC_SELF_EXE)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -255,8 +255,9 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 {
   int length = -1;
   FILE* maps = NULL;
+  int r;
 
-  for (int r = 0; r < WAI_PROC_SELF_MAPS_RETRY; ++r)
+  for (r = 0; r < WAI_PROC_SELF_MAPS_RETRY; ++r)
   {
     maps = fopen(WAI_PROC_SELF_MAPS, "r");
     if (!maps)
@@ -294,6 +295,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
               &&buffer[length - 3] == 'a'
               &&buffer[length - 4] == '.')
           {
+            char *begin, *p;
             int fd = open(path, O_RDONLY);
             if (fd == -1)
             {
@@ -301,7 +303,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
               break;
             }
 
-            char* begin = (char*)mmap(0, offset, PROT_READ, MAP_SHARED, fd, 0);
+            begin = (char*)mmap(0, offset, PROT_READ, MAP_SHARED, fd, 0);
             if (begin == MAP_FAILED)
             {
               close(fd);
@@ -309,7 +311,7 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
               break;
             }
 
-            char* p = begin + offset - 30; // minimum size of local file header
+            p = begin + offset - 30; // minimum size of local file header
             while (p >= begin) // scan backwards
             {
               if (*((uint32_t*)p) == 0x04034b50UL) // local file header signature found
@@ -791,6 +793,49 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
   }
 
   return length;
+}
+
+#elif defined(__sgi)
+
+/*
+ * These functions are stubbed for now to get the code compiling.
+ * In the future it may be possible to get these working in some way.
+ * Current ideas are checking the working directory for a binary with
+ * the same executed name and reading links, or worst case just searching
+ * through the entirety of the filesystem that's readable by the user.
+ *
+ * I'm not sure it's actually possible to find the absolute path via a
+ * direct method on IRIX. Its implementation of /proc is a fairly barebones
+ * SVR4 implementation. Other UNIXes (e.g. Solaris) have extensions to /proc
+ * that make finding the absolute path possible but these don't exist on IRIX.
+ */
+
+WAI_FUNCSPEC
+int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
+{
+  return -1;
+}
+
+WAI_FUNCSPEC
+int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
+{
+  return -1;
+}
+
+#elif defined(__SWITCH__) || defined(__vita__)
+
+/* Not possible on this platform */
+
+WAI_FUNCSPEC
+int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
+{
+  return -1;
+}
+
+WAI_FUNCSPEC
+int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
+{
+  return -1;
 }
 
 #else
