@@ -40,7 +40,7 @@ WAI_FUNCSPEC
 int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length);
 
 /**
- * Returns the path to the current module
+ * Returns the path to the current module.
  *
  * Usage:
  *  - first call `int length = wai_getModulePath(NULL, 0, NULL);` to retrieve
