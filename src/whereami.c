@@ -231,16 +231,61 @@ int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
   return ok ? length : -1;
 }
 
+#ifdef __sun
+#include <dlfcn.h>
+
+WAI_NOINLINE WAI_FUNCSPEC
+int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
+{
+  char buffer[PATH_MAX];
+  char* resolved = NULL;
+  int length = -1;
+
+  for(;;)
+  {
+    Dl_info info;
+
+    if (dladdr(WAI_RETURN_ADDRESS(), &info))
+    {
+      resolved = realpath(info.dli_fname, buffer);
+      if (!resolved)
+        break;
+
+      length = (int)strlen(resolved);
+      if (length <= capacity)
+      {
+        memcpy(out, resolved, length);
+
+        if (dirname_length)
+        {
+          int i;
+
+          for (i = length - 1; i >= 0; --i)
+          {
+            if (out[i] == '/')
+            {
+              *dirname_length = i;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    break;
+  }
+
+  return length;
+}
+
+#else
+
 #if !defined(WAI_PROC_SELF_MAPS_RETRY)
 #define WAI_PROC_SELF_MAPS_RETRY 5
 #endif
 
 #if !defined(WAI_PROC_SELF_MAPS)
-#if defined(__sun)
-#define WAI_PROC_SELF_MAPS "/proc/self/map"
-#else
 #define WAI_PROC_SELF_MAPS "/proc/self/maps"
-#endif
 #endif
 
 #if defined(__ANDROID__) || defined(ANDROID)
@@ -366,6 +411,8 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 
   return length;
 }
+
+#endif
 
 #elif defined(__APPLE__)
 
