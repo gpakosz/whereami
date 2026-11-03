@@ -614,9 +614,10 @@ int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
 
   length = (int)strnlen(buffer, sizeof(buffer));
 
-  if (out != NULL && length <= capacity)
+  if (length <= capacity)
   {
     memcpy(out, buffer, length);
+
     if (dirname_length != NULL)
     {
       int i;
