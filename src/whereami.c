@@ -601,109 +601,38 @@ int WAI_PREFIX(getModulePath)(char* out, int capacity, int* dirname_length)
 
 #if defined(__OpenBSD__)
 
-#include <unistd.h>
+#include <unistd.h> /* getexecpath(3) */
 
 WAI_FUNCSPEC
 int WAI_PREFIX(getExecutablePath)(char* out, int capacity, int* dirname_length)
 {
-  char buffer1[4096];
-  char buffer2[PATH_MAX];
-  char buffer3[PATH_MAX];
-  char** argv = (char**)buffer1;
-  char* resolved = NULL;
+  char buffer[PATH_MAX];
   int length = -1;
-  bool ok;
 
-  for (ok = false; !ok; ok = true)
+  if (getexecpath(buffer, sizeof(buffer)) == -1)
+    return -1;
+
+  length = (int)strnlen(buffer, sizeof(buffer));
+
+  if (out != NULL && length <= capacity)
   {
-    int mib[4] = { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
-    size_t size;
-
-    if (sysctl(mib, 4, NULL, &size, NULL, 0) != 0)
-        break;
-
-    if (size > sizeof(buffer1))
+    memcpy(out, buffer, length);
+    if (dirname_length != NULL)
     {
-      argv = (char**)WAI_MALLOC(size);
-      if (!argv)
-        break;
-    }
+      int i;
 
-    if (sysctl(mib, 4, argv, &size, NULL, 0) != 0)
-        break;
-
-    if (strchr(argv[0], '/'))
-    {
-      resolved = realpath(argv[0], buffer2);
-      if (!resolved)
-        break;
-    }
-    else
-    {
-      const char* PATH = getenv("PATH");
-      if (!PATH)
-        break;
-
-      size_t argv0_length = strlen(argv[0]);
-
-      const char* begin = PATH;
-      while (1)
+      for (i = length - 1; i >= 0; --i)
       {
-        const char* separator = strchr(begin, ':');
-        const char* end = separator ? separator : begin + strlen(begin);
-
-        if (end - begin > 0)
+        if (out[i] == '/')
         {
-          if (*(end -1) == '/')
-            --end;
-
-          if (((end - begin) + 1 + argv0_length + 1) <= sizeof(buffer2))
-          {
-            memcpy(buffer2, begin, end - begin);
-            buffer2[end - begin] = '/';
-            memcpy(buffer2 + (end - begin) + 1, argv[0], argv0_length + 1);
-
-            resolved = realpath(buffer2, buffer3);
-            if (resolved)
-              break;
-          }
-        }
-
-        if (!separator)
+          *dirname_length = i;
           break;
-
-        begin = ++separator;
-      }
-
-      if (!resolved)
-        break;
-    }
-
-    length = (int)strlen(resolved);
-    if (length <= capacity)
-    {
-      memcpy(out, resolved, length);
-
-      if (dirname_length)
-      {
-        int i;
-
-        for (i = length - 1; i >= 0; --i)
-        {
-          if (out[i] == '/')
-          {
-            *dirname_length = i;
-            break;
-          }
         }
       }
     }
   }
 
-  if (argv != (char**)buffer1)
-    WAI_FREE(argv);
-
-  return ok ? length : -1;
+  return length;
 }
 
 #else
